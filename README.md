@@ -25,21 +25,24 @@ The **Family Calendar** is a smart, user-friendly application built to help fami
    cd Family-Calendar
    
 2. Create a virtual environment (optional but recommended):
-   
+    ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows use: venv\Scripts\activate
 
-4. Install dependencies:
+3. **Install dependencies:**
+   ```bash
 pip install -r requirements.txt
 
-5. Run the application:
+4. **Run the application:**
+   ```bash
    python app.py
 
-6. Open in Browser:
+5. **Open in Browser:**
+   ```bash
    http://localhost:5000
 
-   📞 Contact
-   
+## 📞 Contact
+  ```bash  
 📧 Email: ankitrao0018.com
 🔗 GitHub: Ankityadav0018
 🔗 LinkedIn: www.linkedin.com/in/ankit-yadav01
