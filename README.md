@@ -23,20 +23,23 @@ The **Family Calendar** is a smart, user-friendly application built to help fami
    ```bash
    git clone https://github.com/YourUsername/Family-Calendar.git
    cd Family-Calendar
+   
 2. Create a virtual environment (optional but recommended):
+   
 python -m venv venv
 source venv/bin/activate  # On Windows use: venv\Scripts\activate
 
-3. Install dependencies:
+4. Install dependencies:
 pip install -r requirements.txt
 
-4. Run the application:
+5. Run the application:
    python app.py
 
-5. Open in Browser:
+6. Open in Browser:
    http://localhost:5000
 
    📞 Contact
+   
 📧 Email: ankitrao0018.com
 🔗 GitHub: Ankityadav0018
 🔗 LinkedIn: www.linkedin.com/in/ankit-yadav01
