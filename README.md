@@ -43,6 +43,6 @@ The **Family Calendar** is a smart, user-friendly application built to help fami
 
 ## 📞 Contact
   ```bash  
-📧 Email: ankitrao0018.com
+📧 Email: ankitrao0018@gmail.com
 🔗 GitHub: Ankityadav0018
 🔗 LinkedIn: www.linkedin.com/in/ankit-yadav01
