@@ -55,6 +55,10 @@ class FamilyCalendar:
 st.set_page_config(page_title="Family Calendar", layout="centered")
 st.title("📅 Family Calendar")
 
+# Display current date
+today = datetime.date.today()
+st.markdown(f"**📅 Today's Date:** {today.strftime('%A, %B %d, %Y')}")
+
 if "calendar" not in st.session_state:
     st.session_state.calendar = FamilyCalendar()
 
