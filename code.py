@@ -52,9 +52,9 @@ class FamilyCalendar:
         return upcoming
 
 # --- App UI ---
-st.set_page_config(page_title="Family Calendar", layout="centered")
 today = datetime.date.today()
-st.title(f"📅 {today.strftime('%d %B')} - Family Calendar")
+st.set_page_config(page_title="Family Calendar", layout="centered")
+st.title(f"📅 {today.strftime('%d %B')} – Family Calendar")
 
 # Display current date
 today = datetime.date.today()
