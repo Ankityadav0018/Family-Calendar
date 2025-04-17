@@ -118,6 +118,4 @@ with tab3:
             st.write(f"- {m}")
     else:
         st.info("No members added yet.")
-{
-  "python.logging.level": "error"
-}
+
