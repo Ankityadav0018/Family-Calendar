@@ -54,8 +54,7 @@ class FamilyCalendar:
 # --- App UI ---
 st.set_page_config(page_title="Family Calendar", layout="centered")
 today = datetime.date.today()
-st.title(f"📅 Family Calendar – {today.strftime('%B %d, %Y')}")
-
+st.title(f"📅 {today.strftime('%d %B')} - Family Calendar")
 
 # Display current date
 today = datetime.date.today()
