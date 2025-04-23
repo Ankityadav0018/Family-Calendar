@@ -1,104 +1,113 @@
+
+
 import streamlit as st
 import datetime
 from collections import defaultdict
+import requests
 
-# --- Login Page ---
+# ========== PAGE CONFIG (MUST BE FIRST) ==========
+st.set_page_config(page_title="Family Calendar Pro", layout="centered")
+
+# ========== CONFIGURATION ==========
+DEEPSEEK_API_KEY = "sk-001b301810274203bd0735cb86d8c06a"   # Replace with your actual key
+DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"  # Verify endpoint
+
+# ========== PREMIUM FEATURES ==========
+def show_premium_popup():
+    with st.popover("🔒 Premium Feature"):
+        st.markdown("### 🚀 Upgrade to Premium!")
+        st.write("Unlock all features including:")
+        st.write("- 📅 Advanced calendar analytics")
+        st.write("- 👪 Extended family management")
+        st.write("- 💬 Unlimited AI chat")
+        if st.button("Upgrade Now"):
+            st.session_state.premium_user = True
+            st.rerun()
+
+# ========== CENTERED LOGIN PAGE ==========
 def login():
     st.markdown("""
         <style>
-            body {
-                background: url('https://www.w3schools.com/w3images/forest.jpg') no-repeat center center fixed;
-                background-size: cover;
+            
+            .login-title {
                 color: white;
-                font-family: 'Arial', sans-serif;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 100vh;
+                margin-bottom: 30px;
+                font-size: 36px;
+                font-weight: bold;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
             }
-
-            .login-form {
-                background-color: rgba(0, 0, 0, 0.5);
-                padding: 20px;
-                border-radius: 10px;
-                width: 400px;
-                text-align: center;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            .stTextInput>div>div>input {
+                color: white !important;
+                background: rgba(255, 255, 255, 0.1) !important;
+                border: 1px solid rgba(255, 255, 255, 0.2) !important;
+                border-radius: 8px !important;
+                padding: 10px 15px !important;
             }
-
-            .login-form input {
-                width: 80%;
-                padding: 10px;
-                margin: 10px 0;
-                border-radius: 5px;
-                border: none;
-                font-size: 16px;
-            }
-
-            .login-form button {
-                background-color: #4CAF50;
+            .login-button {
+                width: 100%;
+                padding: 12px;
+                border-radius: 8px;
+                background: linear-gradient(45deg, #6e48aa, #9d50bb);
                 color: white;
-                padding: 12px 20px;
-                border-radius: 5px;
                 border: none;
-                font-size: 18px;
+                font-weight: bold;
+                margin-top: 20px;
                 cursor: pointer;
-                transition: background-color 0.3s ease;
+                transition: all 0.3s;
             }
-
-            .login-form button:hover {
-                background-color: #45a049;
-            }
-
-            .login-form h2 {
-                margin-bottom: 20px;
-                font-size: 28px;
-            }
-
-            .login-form p {
+            .error-message {
+                color: #ff4b4b;
+                margin-top: 15px;
                 font-size: 14px;
-                color: #ddd;
-            }
-
-            .login-form a {
-                color: #4CAF50;
-                text-decoration: none;
-            }
-
-            .login-form a:hover {
-                text-decoration: underline;
             }
         </style>
     """, unsafe_allow_html=True)
 
-    st.markdown("<div class='login-form'>", unsafe_allow_html=True)
-    st.markdown("<h2>🔐 Family Calendar Login</h2>", unsafe_allow_html=True)
+    # Create centered container
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.markdown("""
+<style>
+    .big-title {
+        font-size: 35px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+</style>
+""", unsafe_allow_html=True)
 
-    username = st.text_input("Username", key="username", placeholder="Enter your username")
-    password = st.text_input("Password", type="password", key="password", placeholder="Enter your password")
+# Then use it like this:
+        st.markdown("<div class='big-title'> 🔐 FAMILY CALENDAR</div>", unsafe_allow_html=True)
+        # Username field
+        username = st.text_input("", placeholder="Username", key="username")
+        
+        # Password field
+        password = st.text_input("", type="password", placeholder="Password", key="password")
+        
+        # Remember me checkbox
+        st.checkbox("Remember me", key="remember_me")
+        
+        # Login button
+        if st.button("Login", key="login_button"):
+            if username == "admin" and password == "admin123":
+                st.session_state.logged_in = True
+                st.session_state.premium_user = False
+                st.session_state.chat_history = []  # Initialize chat history
+                st.rerun()
+            else:
+                st.markdown("<div class='error-message'>Invalid username or password</div>", unsafe_allow_html=True)
+        
+        # Forgot password link
+        st.markdown("[Forgot password?](#)", unsafe_allow_html=True)
+        
+        st.markdown("</div>", unsafe_allow_html=True)
 
-    if st.button("Login"):
-        # You can replace this with a proper auth system
-        if username == "admin" and password == "password":
-            st.session_state.logged_in = True
-            st.success("Logged in successfully!")
-            st.rerun()
-        else:
-            st.error("Invalid credentials")
-
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
-
-if not st.session_state.logged_in:
-    login()
-    st.stop()  # Prevents the rest of the app from loading
-
-
-# --- Backend Class ---
+# ========== FAMILY CALENDAR CLASS ==========
 class FamilyCalendar:
     def __init__(self):
         self.events = defaultdict(list)
-        self.family_members = {}  # Store members as dict with name and birthday
+        self.family_members = {}
 
     def add_family_member(self, name, birthday=None):
         self.family_members[name] = birthday
@@ -155,114 +164,276 @@ class FamilyCalendar:
         for name, bday in self.family_members.items():
             if bday:
                 bday_this_year = bday.replace(year=today.year)
-                # If birthday already passed, show next year's birthday
                 if bday_this_year < today:
                     bday_this_year = bday_this_year.replace(year=today.year + 1)
                 upcoming_bdays.append((name, bday_this_year))
         return sorted(upcoming_bdays, key=lambda x: x[1])
 
-# --- App UI ---
-today = datetime.date.today()
-st.set_page_config(page_title="Family Calendar", layout="centered")
-st.title(f"📅 {today.strftime('%d %B')} – Family Calendar")
+# ========== BASIC CHATBOT FALLBACK ==========
+class BasicChatbot:
+    def get_response(self, prompt, calendar_data):
+        prompt = prompt.lower()
+        
+        if any(word in prompt for word in ["hello", "hi", "hey"]):
+            return "Hello! I'm your family calendar assistant."
+        
+        elif any(word in prompt for word in ["event", "meeting", "appointment"]):
+            events = calendar_data.get_upcoming_events(7)
+            if not events:
+                return "No upcoming events in the next week."
+            return "Upcoming events:\n" + "\n".join([f"- {e['title']} on {e['date']}" for e in events])
+        
+        elif any(word in prompt for word in ["birthday", "bday"]):
+            birthdays = calendar_data.get_birthday_dates()
+            if not birthdays:
+                return "No upcoming birthdays."
+            return "Upcoming birthdays:\n" + "\n".join([f"- {name}'s birthday on {date.strftime('%B %d')}" for name, date in birthdays])
+        
+        elif any(word in prompt for word in ["member", "family"]):
+            members = calendar_data.get_family_members()
+            if not members:
+                return "No family members registered."
+            return "Family members: " + ", ".join(members)
+        
+        return "I can help with events, birthdays, and family members. Try asking about those!"
 
-# Display current date
-st.markdown(f"**📅 Today's Date:** {today.strftime('%A, %B %d, %Y')}")
+# ========== DEEPSEEK CHATBOT ==========
+class DeepSeekChatbot:
+    def __init__(self, api_key):
+        self.api_key = api_key
+        self.initialized = bool(api_key)
+        self.headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+        self.basic_chatbot = BasicChatbot()  # Fallback
 
-# Dark Mode Toggle
-if "dark_mode" not in st.session_state:
-    st.session_state.dark_mode = False
+    def get_response(self, prompt, calendar_data):
+        if not self.initialized:
+            return self.basic_chatbot.get_response(prompt, calendar_data)
+        
+        try:
+            context = self._build_context(calendar_data)
+            
+            payload = {
+                "model": "deepseek-chat",
+                "messages": [
+                    {"role": "system", "content": context},
+                    {"role": "user", "content": prompt}
+                ],
+                "temperature": 0.7
+            }
+            
+            response = requests.post(
+                DEEPSEEK_API_URL,
+                headers=self.headers,
+                json=payload,
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                return response.json()["choices"][0]["message"]["content"]
+            elif response.status_code == 402:  # Insufficient balance
+                show_premium_popup()
+                return self.basic_chatbot.get_response(prompt, calendar_data)
+            else:
+                return f"API Error: {response.status_code}. {self.basic_chatbot.get_response(prompt, calendar_data)}"
+                
+        except Exception as e:
+            return f"{self.basic_chatbot.get_response(prompt, calendar_data)} [API Error: {str(e)}]"
 
-st.sidebar.markdown("---")
-if st.sidebar.checkbox("🌙 Dark Mode"):
-    st.session_state.dark_mode = True
+    def _build_context(self, calendar_data):
+        return f"""You're a family calendar assistant. Current context:
+Family Members: {', '.join(calendar_data.get_family_members()) or 'None'}
+Upcoming Events: {self._format_events(calendar_data.get_upcoming_events(7))}
+Upcoming Birthdays: {self._format_birthdays(calendar_data.get_birthday_dates())}
+Today: {datetime.date.today().strftime('%A, %B %d, %Y')}"""
+
+    def _format_events(self, events):
+        return "\n".join(f"- {e['title']} on {e['date']}" for e in events) if events else "None"
+
+    def _format_birthdays(self, birthdays):
+        return "\n".join(f"- {name}'s on {date.strftime('%B %d')}" for name, date in birthdays) if birthdays else "None"
+
+# ========== MAIN APPLICATION ==========
+def main_app():
+    # Initialize session state variables
+    if "calendar" not in st.session_state:
+        st.session_state.calendar = FamilyCalendar()
+    
+    if "chatbot" not in st.session_state:
+        try:
+            st.session_state.chatbot = DeepSeekChatbot(DEEPSEEK_API_KEY)
+            if not DEEPSEEK_API_KEY or DEEPSEEK_API_KEY == "your_api_key_here":
+                show_premium_popup()
+        except Exception as e:
+            st.error(f"Chatbot error: {str(e)}")
+            st.session_state.chatbot = BasicChatbot()
+
+    today = datetime.date.today()
+    st.title(f"📅 Family Calendar {'Pro' if st.session_state.get('premium_user') else ''} - {today.strftime('%B %Y')}")
+    st.markdown(f"**Today's Date:** {today.strftime('%A, %B %d, %Y')}")
+
+    # Sidebar with premium indicator
+    with st.sidebar:
+        if st.session_state.get('premium_user'):
+            st.success("🌟 Premium Member")
+        else:
+            st.warning("Free Account")
+            if st.button("Upgrade to Premium"):
+                show_premium_popup()
+
+        st.header("👨‍👩‍👧‍👦 Family Members")
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.subheader("Add Member")
+            new_member = st.text_input("Name", key="new_member")
+            birthday = st.date_input("Birthday", key="new_birthday")
+            if st.button("Add"):
+                if new_member:
+                    st.session_state.calendar.add_family_member(new_member.strip(), birthday)
+                    st.success(f"Added {new_member}!")
+        
+        with col2:
+            st.subheader("Delete Member")
+            member_to_delete = st.selectbox(
+                "Select member",
+                st.session_state.calendar.get_family_members(),
+                key="delete_member"
+            )
+            if st.button("Delete"):
+                if st.session_state.calendar.delete_family_member(member_to_delete):
+                    st.success(f"Deleted {member_to_delete}")
+
+    # Main tabs - Add premium tab for premium users
+    if st.session_state.get('premium_user'):
+        tab1, tab2, tab3, tab4, tab5 = st.tabs([
+            "➕ Add Event", 
+            "📆 View Events", 
+            "👥 Family Members", 
+            "🎈 Birthdays", 
+            "💬 Chat Assistant"
+        ])
+    else:
+        tab1, tab2, tab3, tab4, tab5 = st.tabs([
+            "➕ Add Event", 
+            "📆 View Events", 
+            "👥 Family Members", 
+            "🎈 Birthdays", 
+            "💬 Chat Assistant"
+        ])
+
+    # Tab 1: Add Event
+    with tab1:
+        st.subheader("Create New Event")
+        with st.form("event_form"):
+            title = st.text_input("Event Title")
+            date = st.date_input("Date", today)
+            participants = st.multiselect(
+                "Participants",
+                st.session_state.calendar.get_family_members()
+            )
+            description = st.text_area("Description")
+            
+            if st.form_submit_button("Add Event"):
+                success, message = st.session_state.calendar.add_event(
+                    title, date, participants, description
+                )
+                if success:
+                    st.success(message)
+                else:
+                    st.error(message)
+
+    # Tab 2: View Events
+    with tab2:
+        st.subheader("Upcoming Events")
+        view_option = st.radio(
+            "View options",
+            ["All Upcoming", "Next 7 Days", "By Date"],
+            horizontal=True
+        )
+        
+        if view_option == "All Upcoming":
+            events = st.session_state.calendar.get_events()
+        elif view_option == "Next 7 Days":
+            events = st.session_state.calendar.get_upcoming_events(7)
+        else:
+            selected_date = st.date_input("Select date", today)
+            events = st.session_state.calendar.get_events(selected_date)
+        
+        if not events:
+            st.info("No events found")
+        else:
+            for event in sorted(events, key=lambda x: x["date"]):
+                with st.expander(f"{event['title']} - {event['date']}"):
+                    st.markdown(f"**Participants:** {', '.join(event['participants'])}")
+                    if event["description"]:
+                        st.markdown(f"**Description:** {event['description']}")
+
+    # Tab 3: Family Members
+    with tab3:
+        st.subheader("Family Members")
+        members = st.session_state.calendar.get_family_members()
+        if not members:
+            st.info("No family members added yet")
+        else:
+            for member in members:
+                st.markdown(f"- {member}")
+
+    # Tab 4: Birthdays
+    with tab4:
+        st.subheader("Upcoming Birthdays")
+        birthdays = st.session_state.calendar.get_birthday_dates()
+        if not birthdays:
+            st.info("No birthdays added yet")
+        else:
+            for name, date in birthdays:
+                days_until = (date - today).days
+                st.markdown(f"### {name}")
+                st.markdown(f"**Date:** {date.strftime('%B %d')}")
+                st.markdown(f"**Days until:** {days_until}")
+                st.divider()
+
+    # Tab 5: Chat Assistant
+    with tab5:
+        st.subheader("Calendar Assistant")
+        st.caption("Ask me about events, birthdays, or family members")
+        
+        # Initialize chat history if not exists
+        if "chat_history" not in st.session_state:
+            st.session_state.chat_history = []
+        
+        # Display chat messages from history
+        for message in st.session_state.chat_history:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
+        
+        # Text input
+        if prompt := st.chat_input("Ask me about your family calendar..."):
+            # Add user message to chat history
+            st.session_state.chat_history.append({"role": "user", "content": prompt})
+            with st.chat_message("user"):
+                st.markdown(prompt)
+            
+            # Generate response
+            with st.spinner("Thinking..."):
+                response = st.session_state.chatbot.get_response(
+                    prompt,
+                    st.session_state.calendar
+                )
+            
+            # Add assistant response to chat history
+            st.session_state.chat_history.append({"role": "assistant", "content": response})
+            
+            # Rerun to update the display
+            st.rerun()
+
+# ========== RUN APPLICATION ==========
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+if not st.session_state.logged_in:
+    login()
 else:
-    st.session_state.dark_mode = False
-
-if st.session_state.dark_mode:
-    st.markdown("""<style>body { background-color: #1e1e1e; color: #f0f0f0; }</style>""", unsafe_allow_html=True)
-
-if "calendar" not in st.session_state:
-    st.session_state.calendar = FamilyCalendar()
-
-calendar = st.session_state.calendar
-
-# --- Sidebar: Add Family Member ---
-with st.sidebar:
-    st.header("👨‍👩‍👧‍👦 Add Family Member")
-    new_member = st.text_input("Name")
-    birthday = st.date_input("Birthday ", min_value=datetime.date(1900, 1, 1))
-    if st.button("Add Member") and new_member:
-        calendar.add_family_member(new_member.strip(), birthday)
-        st.success(f"{new_member} added!")
-
-    # --- Delete Family Member ---
-    st.header("❌ Delete Family Member")
-    member_to_delete = st.selectbox("Select Member to Delete", calendar.get_family_members())
-    if st.button("Delete Member"):
-        if calendar.delete_family_member(member_to_delete):
-            st.success(f"Member '{member_to_delete}' deleted!")
-        else:
-            st.error("Error: Member not found.")
-
-# --- Tabs for Navigation ---
-tab1, tab2, tab3, tab4 = st.tabs(["➕ Add Event", "📆 View Events", "👥 View Members", "🎈 Birthdays"])
-
-# --- Add Event ---
-with tab1:
-    st.subheader("Add New Event")
-    title = st.text_input("Event Title")
-    date = st.date_input("Date", datetime.date.today())
-    participants = st.multiselect("Participants", calendar.get_family_members())
-    description = st.text_area("Description (optional)")
-
-    if st.button("Add Event"):
-        success, msg = calendar.add_event(title, date, participants, description)
-        if success:
-            st.success(msg)
-        else:
-            st.error(msg)
-
-# --- View Events ---
-with tab2:
-    st.subheader("View Events")
-    view_mode = st.radio("Show", ["All Upcoming", "Specific Date", "Next 7 Days"])
-    if view_mode == "All Upcoming":
-        events = calendar.get_events()
-    elif view_mode == "Specific Date":
-        specific_date = st.date_input("Pick a Date")
-        events = calendar.get_events(specific_date)
-    else:
-        events = calendar.get_upcoming_events()
-
-    if not events:
-        st.info("No events found.")
-    else:
-        for e in sorted(events, key=lambda x: x["date"]):
-            st.markdown(f"### {e['title']} ({e['date']})")
-            st.markdown(f"**Participants**: {', '.join(e['participants'])}")
-            if e["description"]:
-                st.markdown(f"**Description**: {e['description']}")
-            st.markdown("---")
-
-# --- View Members ---
-with tab3:
-    st.subheader("Family Members")
-    members = calendar.get_family_members()
-    if members:
-        st.markdown("**Registered Members:**")
-        for m in members:
-            st.write(f"- {m}")
-    else:
-        st.info("No family members registered yet.")
-
-# --- Birthdays ---
-with tab4:
-    st.subheader("Upcoming Birthdays")
-    birthdays = calendar.get_birthday_dates()
-    if birthdays:
-        for name, bday in birthdays:
-            st.markdown(f"### {name} - Birthday: {bday.strftime('%B %d, %Y')}")
-    else:
-        st.info("No upcoming birthdays.")
-
+    main_app()
